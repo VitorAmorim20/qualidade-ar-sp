@@ -28,6 +28,7 @@ const CORES_QUALIDADE = {
   Boa: "#16a34a",
   Moderada: "#d97706",
   Ruim: "#dc2626",
+  "Muito Ruim": "#7f1d1d",
 };
 
 function formatarNumero(valor, casas = 1) {
@@ -42,6 +43,12 @@ function formatarP(valor) {
   if (valor === null || valor === undefined) return "—";
   if (valor < 0.001) return "< 0,001";
   return valor.toLocaleString("pt-BR", { maximumFractionDigits: 4 });
+}
+
+function formatarDataBR(iso) {
+  if (!iso) return "—";
+  const [ano, mes, dia] = iso.split("-");
+  return `${dia}/${mes}/${ano}`;
 }
 
 export default function App() {
@@ -131,8 +138,9 @@ export default function App() {
               Qualidade do ar
             </h1>
             <p className="mt-1 max-w-2xl text-sm text-slate-500">
-              Leituras de agosto de 2026 por região, tráfego e poluentes. Painel para
-              operação, tática e decisão estratégica.
+              {filtros
+                ? `Leituras de ${formatarDataBR(filtros.inicio)} a ${formatarDataBR(filtros.fim)} (${filtros.totalRegistros.toLocaleString("pt-BR")} registros) por região, tráfego e poluentes. Painel para operação, tática e decisão estratégica.`
+                : "Painel para operação, tática e decisão estratégica."}
             </p>
           </div>
           <nav className="flex flex-wrap gap-2">

@@ -78,7 +78,7 @@ export default function MapaEstacoes({ selecionada, onSelect }) {
                   permanent
                   className="mapa-rotulo"
                 >
-                  {estacao.nome}
+                  {estacao.etiqueta || estacao.nome}
                 </Tooltip>
               </Circle>
             );

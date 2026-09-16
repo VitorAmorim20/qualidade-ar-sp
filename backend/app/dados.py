@@ -54,7 +54,11 @@ def filtrar(
 def opcoes_filtro(df: pd.DataFrame) -> dict:
     return {
         "estacoes": sorted(df[COL_ESTACAO].dropna().unique().tolist()),
-        "qualidades": ["Boa", "Moderada", "Ruim"],
+        "qualidades": [
+            item
+            for item in ["Boa", "Moderada", "Ruim", "Muito Ruim"]
+            if item in set(df[COL_QUALIDADE].dropna().unique())
+        ],
         "inicio": df[COL_DATA].min().strftime("%Y-%m-%d"),
         "fim": df[COL_DATA].max().strftime("%Y-%m-%d"),
         "totalRegistros": int(len(df)),
