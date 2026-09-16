@@ -4,6 +4,12 @@ Dashboard de Data Intelligence da Fase 5 (PBL): monitoramento da qualidade do ar
 
 Não possui qualquer ligação com outros sistemas internos.
 
+## Links
+
+- **Dashboard:** https://qualidade-ar-sp.vercel.app/
+- **API:** https://qualidadearsp-api-7yomps-26551d-152-53-192-161.sslip.io
+- **Healthcheck:** https://qualidadearsp-api-7yomps-26551d-152-53-192-161.sslip.io/saude
+
 ## Stack
 
 - **Backend:** FastAPI (pandas, SciPy) — deploy via Dokploy
@@ -43,8 +49,7 @@ npm run dev
 ## Deploy
 
 1. **Dokploy** aponta para a pasta `backend` (Dockerfile na 8000, healthcheck `/saude`).
-2. Copie a URL HTTPS da API.
-3. **Vercel** aponta para a pasta `frontend`, com `VITE_API_URL=https://sua-api`.
-4. No Dokploy, `CORS_ORIGINS` deve incluir a URL do Vercel.
+2. **Vercel** aponta para a pasta `frontend`, com `VITE_API_URL` igual à URL HTTPS da API.
+3. No Dokploy, `CORS_ORIGINS` deve incluir `https://qualidade-ar-sp.vercel.app`.
 
 Push na `main` atualiza os dois.

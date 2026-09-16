@@ -15,6 +15,8 @@ import {
   YAxis,
 } from "recharts";
 import { api } from "./api";
+import MapaEstacoes from "./MapaEstacoes";
+import { COR_ESTACAO } from "./estacoesMapa";
 
 const VISÕES = [
   { id: "operacional", rotulo: "Operacional" },
@@ -165,7 +167,11 @@ export default function App() {
         ) : null}
 
         {visao === "operacional" && kpis && (
-          <Operacional kpis={kpis} estacoes={estacoes} />
+          <Operacional
+            kpis={kpis}
+            estacoes={estacoes}
+            onSelectEstacao={(estacao) => setParams({ ...params, estacao })}
+          />
         )}
         {visao === "tatico" && (
           <Tatico
@@ -191,59 +197,50 @@ function Filtros({ filtros, params, setParams }) {
   const campo =
     "rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-ar-500";
   return (
-    <section className="mb-6 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-4">
-      <label className="flex flex-col gap-1 text-xs font-medium text-slate-500">
-        Estação / região
-        <select
-          className={campo}
-          value={params.estacao}
-          onChange={(e) => setParams({ ...params, estacao: e.target.value })}
-        >
-          <option value="">Todas</option>
-          {filtros.estacoes.map((estacao) => (
-            <option key={estacao} value={estacao}>
-              {estacao}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label className="flex flex-col gap-1 text-xs font-medium text-slate-500">
-        Classificação
-        <select
-          className={campo}
-          value={params.qualidade}
-          onChange={(e) => setParams({ ...params, qualidade: e.target.value })}
-        >
-          <option value="">Todas</option>
-          {filtros.qualidades.map((item) => (
-            <option key={item} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label className="flex flex-col gap-1 text-xs font-medium text-slate-500">
-        Início
-        <input
-          type="date"
-          className={campo}
-          value={params.inicio}
-          min={filtros.inicio}
-          max={filtros.fim}
-          onChange={(e) => setParams({ ...params, inicio: e.target.value })}
-        />
-      </label>
-      <label className="flex flex-col gap-1 text-xs font-medium text-slate-500">
-        Fim
-        <input
-          type="date"
-          className={campo}
-          value={params.fim}
-          min={filtros.inicio}
-          max={filtros.fim}
-          onChange={(e) => setParams({ ...params, fim: e.target.value })}
-        />
-      </label>
+    <section className="mb-6 space-y-3">
+      <MapaEstacoes
+        selecionada={params.estacao}
+        onSelect={(estacao) => setParams({ ...params, estacao })}
+      />
+      <div className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:grid-cols-3">
+        <label className="flex flex-col gap-1 text-xs font-medium text-slate-500">
+          Classificação
+          <select
+            className={campo}
+            value={params.qualidade}
+            onChange={(e) => setParams({ ...params, qualidade: e.target.value })}
+          >
+            <option value="">Todas</option>
+            {filtros.qualidades.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-xs font-medium text-slate-500">
+          Início
+          <input
+            type="date"
+            className={campo}
+            value={params.inicio}
+            min={filtros.inicio}
+            max={filtros.fim}
+            onChange={(e) => setParams({ ...params, inicio: e.target.value })}
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-xs font-medium text-slate-500">
+          Fim
+          <input
+            type="date"
+            className={campo}
+            value={params.fim}
+            min={filtros.inicio}
+            max={filtros.fim}
+            onChange={(e) => setParams({ ...params, fim: e.target.value })}
+          />
+        </label>
+      </div>
     </section>
   );
 }
@@ -258,7 +255,7 @@ function Cartao({ titulo, valor, detalhe }) {
   );
 }
 
-function Operacional({ kpis, estacoes }) {
+function Operacional({ kpis, estacoes, onSelectEstacao }) {
   return (
     <section className="space-y-6">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -312,8 +309,20 @@ function Operacional({ kpis, estacoes }) {
             </thead>
             <tbody>
               {estacoes.map((item) => (
-                <tr key={item.estacao} className="border-t border-slate-100">
-                  <td className="px-4 py-2 font-medium">{item.estacao}</td>
+                <tr
+                  key={item.estacao}
+                  className="cursor-pointer border-t border-slate-100 hover:bg-slate-50"
+                  onClick={() => onSelectEstacao(item.estacao)}
+                >
+                  <td className="px-4 py-2 font-medium">
+                    <span className="inline-flex items-center gap-2">
+                      <span
+                        className="inline-block h-2.5 w-2.5 rounded-full"
+                        style={{ background: COR_ESTACAO[item.estacao] || "#145c45" }}
+                      />
+                      {item.estacao}
+                    </span>
+                  </td>
                   <td className="px-4 py-2">{formatarNumero(item.pm25Medio)}</td>
                   <td className="px-4 py-2">{formatarNumero(item.trafegoMedio, 0)}</td>
                   <td className="px-4 py-2 text-red-600">{item.diasRuim}</td>
@@ -379,7 +388,11 @@ function Tatico({ registros, estacoes, r }) {
               <XAxis type="number" />
               <YAxis type="category" dataKey="estacao" width={100} tick={{ fontSize: 11 }} />
               <Tooltip />
-              <Bar dataKey="pm25Medio" name="PM2.5 médio" fill="#1f7a5c" radius={[0, 6, 6, 0]} />
+              <Bar dataKey="pm25Medio" name="PM2.5 médio" radius={[0, 6, 6, 0]}>
+                {estacoes.map((item) => (
+                  <Cell key={item.estacao} fill={COR_ESTACAO[item.estacao] || "#1f7a5c"} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
